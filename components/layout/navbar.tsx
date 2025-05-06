@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,33 +8,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Search, ShoppingCart, ChevronDown } from "lucide-react";
+import { Search, ShoppingCart, ChevronDown, User, Loader2 } from "lucide-react";
 import Link from "next/link";
-
-// Sample categories data (replace with actual data source)
-const categories = [
-  { title: "Living Room", slug: "living-room" },
-  { title: "Bedroom", slug: "bedroom" },
-  { title: "Dining Room", slug: "dining-room" },
-  { title: "Kitchen", slug: "kitchen" },
-  { title: "Office", slug: "office" },
-  { title: "Outdoor", slug: "outdoor" },
-  { title: "Storage", slug: "storage" },
-  { title: "Bathroom", slug: "bathroom" },
-  { title: "Kids", slug: "kids" },
-  { title: "Lighting", slug: "lighting" },
-];
+import { useGetCategories } from "@/lib/api/categories";
 
 export function NavBar() {
+  const { data: categories, isLoading, error } = useGetCategories();
+
   return (
     <nav className="bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="text-xl font-bold text-black">
           Nashfur
         </Link>
-        <div className="flex space-x-6 items-center">
+        <div className="flex space-x-4 items-center">
           <Button variant="ghost" className="text-black hover:bg-gray-100">
-            <Link href="/home">Home</Link>
+            <Link href="/">Home</Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -41,15 +32,32 @@ export function NavBar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {categories.map((category) => (
-                <DropdownMenuItem key={category.slug} asChild>
-                  <Link href={`/products/${category.slug}`}>
-                    {category.title}
-                  </Link>
+              {isLoading ? (
+                <DropdownMenuItem disabled>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
                 </DropdownMenuItem>
-              ))}
+              ) : error ? (
+                <DropdownMenuItem disabled>
+                  Failed to load categories
+                </DropdownMenuItem>
+              ) : categories && categories.length > 0 ? (
+                categories.map((category) => (
+                  <DropdownMenuItem key={category.id} asChild>
+                    <Link href={`/products/category/${category.id}`}>
+                      {category.title || category.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <DropdownMenuItem disabled>
+                  No categories found
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Rest of your navbar code */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
             <Input
@@ -67,6 +75,22 @@ export function NavBar() {
               <ShoppingCart className="h-6 w-6" />
               <span className="sr-only">Cart</span>
             </Link>
+          </Button>
+
+          {/* Login Button */}
+          <Button variant="ghost" className="text-black hover:bg-gray-100">
+            <Link href="/login" className="flex items-center">
+              <User className="h-5 w-5 mr-2" />
+              Login
+            </Link>
+          </Button>
+
+          {/* Register Button */}
+          <Button
+            variant="default"
+            className="bg-black hover:bg-gray-800 text-white"
+          >
+            <Link href="/register">Register</Link>
           </Button>
         </div>
       </div>

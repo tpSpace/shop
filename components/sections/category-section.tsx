@@ -1,52 +1,40 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import Image from "next/image";
+import { Category } from "@/lib/types";
 import Link from "next/link";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import Image from "next/image"; // Assuming categories might have images
 
-import { categories } from "@/data/siteData";
-import { Button } from "../ui/button";
+interface CategorySectionProps {
+  categories: Category[];
+}
 
-export function CategorySection() {
+export function CategorySection({ categories }: CategorySectionProps) {
   return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold text-black mb-8">
-          <span className="text-sm block">CATEGORY</span>
-          Design your perfect home
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {categories.slice(0, 8).map((category, index) => (
-            <Card
-              key={index}
-              className="hover:shadow-lg transition-shadow duration-300"
-            >
-              <CardContent className="p-0">
-                <Link href={`/products/${category.slug}`}>
-                  <Image
-                    src={category.image}
-                    alt={category.title}
-                    width={300}
-                    height={200}
-                    className="w-full h-40 object-cover"
-                  />
-                </Link>
-              </CardContent>
-              <CardFooter className="p-4 flex flex-col items-start">
-                <p className="font-medium text-gray-800 text-lg">
-                  {category.title}
-                </p>
-                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                  {category.description}
-                </p>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-        <div className="mt-8">
-          <Button className="bg-black text-white hover:bg-gray-800">
-            <Link href="/categories">View All Categories</Link>
-          </Button>
-        </div>
+    <section className="py-12 md:py-16 lg:py-20">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center mb-8 md:mb-12">Shop by Category</h2>
+        {categories && categories.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+            {categories.map((category) => (
+              <Link key={category.id} href={`/products/category/${category.id}`} className="block group">
+                <Card className="overflow-hidden transition-shadow hover:shadow-md h-full">
+                  <CardContent className="p-4 flex flex-col items-center text-center">
+                    {/* Optional: Add category image here */}
+                    {/* <div className="relative w-20 h-20 mb-3 rounded-full overflow-hidden bg-muted">
+                       <Image src={category.imageUrl || "/placeholder.svg"} alt={category.name} fill className="object-cover"/>
+                    </div> */}
+                    <CardTitle className="text-base font-medium group-hover:text-primary transition-colors">
+                      {category.name}
+                    </CardTitle>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No categories available at the moment.</p>
+        )}
       </div>
     </section>
   );
 }
+
