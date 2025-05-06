@@ -41,8 +41,6 @@ async function getHomePageData() {
 
 export default async function Home() {
   const { featuredProducts, categories } = await getHomePageData();
-  console.log("Featured Products:", featuredProducts);
-  console.log("Categories:", categories);
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <main className="flex-grow">

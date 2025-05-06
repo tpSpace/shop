@@ -68,7 +68,7 @@ export default async function ProductDetailPage({
   const product = await getProductById(id);
 
   if (!product) {
-    notFound(); // Trigger 404 if product not found
+    notFound(); // Trigger 404 if product not foun
   }
 
   const averageRating = calculateAverageRating(product.ratings);

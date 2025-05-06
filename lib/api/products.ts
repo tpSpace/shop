@@ -47,6 +47,7 @@ export const getFeaturedProducts = async (
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
     const response = await apiClient.get<Product>(`/api/v1/products/${id}`);
+    // console.log("Product Data:", response.data);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch product ${id}:`, error);

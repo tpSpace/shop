@@ -17,7 +17,9 @@ function SearchResults() {
   const currentPage = parseInt(searchParams.get("page") || "0", 10);
   const pageSize = parseInt(searchParams.get("size") || "12", 10);
 
-  const [productsData, setProductsData] = useState<PaginatedProducts | null>(null);
+  const [productsData, setProductsData] = useState<PaginatedProducts | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +50,7 @@ function SearchResults() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">
-        Search Results for "<span className="text-primary">{query}</span>"
+        Search Results for <span className="text-primary">{query}</span>
       </h1>
 
       {isLoading ? (
@@ -65,7 +67,9 @@ function SearchResults() {
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : !productsData || productsData.content.length === 0 ? (
-        <p className="text-center text-gray-500">No products found matching your search.</p>
+        <p className="text-center text-gray-500">
+          No products found matching your search.
+        </p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -78,13 +82,25 @@ function SearchResults() {
           {productsData.totalPages > 1 && (
             <div className="mt-12 flex justify-center items-center space-x-4">
               <Button variant="outline" disabled={currentPage === 0} asChild>
-                <Link href={`?q=${query}&page=${currentPage - 1}&size=${pageSize}`}>Previous</Link>
+                <Link
+                  href={`?q=${query}&page=${currentPage - 1}&size=${pageSize}`}
+                >
+                  Previous
+                </Link>
               </Button>
               <span className="text-sm text-gray-600">
                 Page {currentPage + 1} of {productsData.totalPages}
               </span>
-              <Button variant="outline" disabled={currentPage >= productsData.totalPages - 1} asChild>
-                <Link href={`?q=${query}&page=${currentPage + 1}&size=${pageSize}`}>Next</Link>
+              <Button
+                variant="outline"
+                disabled={currentPage >= productsData.totalPages - 1}
+                asChild
+              >
+                <Link
+                  href={`?q=${query}&page=${currentPage + 1}&size=${pageSize}`}
+                >
+                  Next
+                </Link>
               </Button>
             </div>
           )}
@@ -96,10 +112,15 @@ function SearchResults() {
 
 // Wrap the client component in Suspense for searchParams usage
 export default function SearchPage() {
-    return (
-        <Suspense fallback={<div className="container mx-auto px-4 py-8"><h1 className="text-3xl font-bold mb-8">Loading search results...</h1></div>}>
-            <SearchResults />
-        </Suspense>
-    );
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold mb-8">Loading search results...</h1>
+        </div>
+      }
+    >
+      <SearchResults />
+    </Suspense>
+  );
 }
-
