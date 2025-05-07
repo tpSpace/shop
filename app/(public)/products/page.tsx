@@ -19,6 +19,9 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
+// Add type for sort options
+type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+
 interface ProductsPageProps {
   searchParams: Promise<{
     query?: string;
@@ -27,7 +30,7 @@ interface ProductsPageProps {
     maxPrice?: string;
     page?: string;
     size?: string;
-    sort?: string;
+    sort?: SortOption;
   }>;
 }
 
@@ -44,7 +47,7 @@ export default async function ProductsPage({
   const maxPrice = params?.maxPrice ? parseFloat(params.maxPrice) : undefined;
   const page = parseInt(params?.page || "0", 10);
   const size = parseInt(params?.size || "12", 10);
-  const sort = params?.sort || "newest";
+  const sort = (params?.sort || "newest") as SortOption;
 
   // Fetch products and categories in parallel
   const [productsData, categories] = await Promise.all([

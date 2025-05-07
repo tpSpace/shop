@@ -10,21 +10,24 @@ import {
 
 // File: lib/api/products.ts
 
+// Define sort options type for better type safety
+type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+
 export const getAllProducts = async (
   page: number = 0,
   size: number = 12,
   categoryId: string = "",
   query: string = "",
-  sort: string = "newest",
+  sort: SortOption = "newest",
   minPrice?: number,
   maxPrice?: number
 ): Promise<PaginatedProducts | null> => {
   try {
-    // Build request parameters
-    const params: Record<string, unknown> = {
+    // Build request parameters with type safety
+    const params: Record<string, string | number> = {
       page: page.toString(),
       size: size.toString(),
-    }; // Reverted to Record<string, any>
+    };
 
     // Add category filter if provided
     if (categoryId) {
@@ -37,15 +40,15 @@ export const getAllProducts = async (
     }
 
     // Add price filters if provided
-    if (minPrice !== undefined) {
+    if (minPrice !== undefined && minPrice >= 0) {
       params.minPrice = minPrice;
     }
 
-    if (maxPrice !== undefined) {
+    if (maxPrice !== undefined && maxPrice > 0) {
       params.maxPrice = maxPrice;
     }
 
-    // Add sorting parameters
+    // Add sorting parameters with type safety
     switch (sort) {
       case "price_asc":
         params.sortBy = "price";
@@ -69,18 +72,21 @@ export const getAllProducts = async (
         params.direction = "desc";
     }
 
-    // Make API request
+    // Make API request with error handling
     const response = await apiClient.get<PaginatedProducts>(
       "/api/v1/products",
-      {
-        params,
-      }
+      { params }
     );
+
+    if (!response.data) {
+      throw new Error("No data received from the server");
+    }
 
     return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);
-    return null;
+    // You might want to throw the error here to handle it in the UI
+    throw error;
   }
 };
 

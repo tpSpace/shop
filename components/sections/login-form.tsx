@@ -1,116 +1,135 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { z } from "zod";
+import { login, getCurrentUser } from "@/lib/auth";
+import { useAuthStore } from "@/lib/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useAuthStore } from "@/lib/store/authStore";
-import { loginUser } from "@/lib/api/auth";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters." }),
+// Validation schema
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const setAuth = useAuthStore((state) => state.setAuth);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+type LoginFormData = z.infer<typeof loginSchema>;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+export function LoginForm() {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+  const onSubmit = async (data: LoginFormData) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      const response = await loginUser(values.email, values.password);
-      if (response) {
-        // This will store token in localStorage and update auth state
-        setAuth(response.token, response);
-
-        toast.success("Login Successful", {
-          description: `Welcome back, ${
-            response.user.name || response.user.email
-          }!`,
-        });
-
-        const redirectUrl = searchParams.get("redirect") || "/";
-        router.push(redirectUrl);
-      } else {
-        throw new Error(
-          response?.message || "Invalid credentials or server error."
-        );
+      // Login and get token
+      const authResponse = await login(data);
+      
+      if (!authResponse || !authResponse.token) {
+        throw new Error("Invalid login response");
       }
-    } catch (error: any) {
-      console.error("Login failed:", error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error.message ||
-        "Login failed. Please check your credentials.";
-
-      toast.error("Login Failed", {
-        description: errorMessage,
-      });
+      
+      // Get user data with the token
+      const user = await getCurrentUser();
+      
+      // Save auth info to store
+      setAuth(authResponse.token, user);
+      
+      // Redirect to homepage
+      router.push("/");
+      router.refresh(); // Force refresh to update navbar state
+    } catch (err: any) {
+      // Handle various error types
+      if (err.response?.status === 401) {
+        setError("Invalid email or password. Please try again.");
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
+      console.error("Login error:", err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="your@email.com" {...field} type="email" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="your.email@example.com"
+          {...register("email")}
         />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input placeholder="******" {...field} type="password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        {errors.email && (
+          <p className="text-sm text-red-500">{errors.email.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <Label htmlFor="password">Password</Label>
+          <a
+            href="#"
+            className="text-sm text-primary hover:underline"
+            onClick={(e) => {
+              e.preventDefault();
+              // Add forgot password functionality
+              alert("Forgot password functionality not implemented yet");
+            }}
+          >
+            Forgot password?
+          </a>
+        </div>
+        <Input
+          id="password"
+          type="password"
+          placeholder="••••••••"
+          {...register("password")}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isLoading ? "Logging in..." : "Log In"}
-        </Button>
-      </form>
-    </Form>
+        {errors.password && (
+          <p className="text-sm text-red-500">{errors.password.message}</p>
+        )}
+      </div>
+
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={loading}
+      >
+        {loading ? "Logging in..." : "Log In"}
+      </Button>
+    </form>
   );
 }
