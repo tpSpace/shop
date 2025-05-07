@@ -6,7 +6,14 @@ import { useAuthStore } from "@/lib/store/authStore";
 import { useCartStore } from "@/lib/store/cartStore"; // Import cart store
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ShoppingCart, User, LogOut, LogIn, UserPlus } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  LogOut,
+  LogIn,
+  UserPlus,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   DropdownMenu,
@@ -36,7 +43,10 @@ export function SiteHeader() {
 
   const handleLogout = () => {
     logout();
-    toast({ title: "Logged Out", description: "You have been successfully logged out." });
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
     router.push("/"); // Redirect to home after logout
   };
 
@@ -53,7 +63,7 @@ export function SiteHeader() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             {/* <Icons.logo className="h-6 w-6" /> */}
-            <span className="hidden font-bold sm:inline-block">Nashfur</span>
+            <span className="hidden font-bold sm:inline-block">IdeaZ</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
@@ -68,7 +78,10 @@ export function SiteHeader() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex flex-1 items-center space-x-2 md:ml-6">
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-1 items-center space-x-2 md:ml-6"
+        >
           <Input
             type="search"
             placeholder="Search products..."
@@ -76,7 +89,12 @@ export function SiteHeader() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Button type="submit" variant="outline" size="icon" className="h-9 w-9">
+          <Button
+            type="submit"
+            variant="outline"
+            size="icon"
+            className="h-9 w-9"
+          >
             <Search className="h-4 w-4" />
           </Button>
         </form>
@@ -99,18 +117,27 @@ export function SiteHeader() {
               isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="icon" className="rounded-full h-8 w-8 sm:h-9 sm:w-9">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="rounded-full h-8 w-8 sm:h-9 sm:w-9"
+                    >
                       <User className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span className="sr-only">User Menu</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{user?.name || user?.email || "My Account"}</DropdownMenuLabel>
+                    <DropdownMenuLabel>
+                      {user?.name || user?.email || "My Account"}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {/* <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem> */}
                     {/* <DropdownMenuItem asChild><Link href="/orders">Orders</Link></DropdownMenuItem> */}
                     {/* <DropdownMenuSeparator /> */}
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-600 cursor-pointer"
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
                     </DropdownMenuItem>
@@ -118,16 +145,16 @@ export function SiteHeader() {
                 </DropdownMenu>
               ) : (
                 <div className="flex items-center space-x-1 sm:space-x-2">
-                   <Button variant="outline" size="sm" asChild>
-                      <Link href="/login">
-                          <LogIn className="mr-1 h-4 w-4"/> Login
-                      </Link>
-                   </Button>
-                   <Button size="sm" asChild>
-                      <Link href="/register">
-                          <UserPlus className="mr-1 h-4 w-4"/> Register
-                      </Link>
-                   </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/login">
+                      <LogIn className="mr-1 h-4 w-4" /> Login
+                    </Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link href="/register">
+                      <UserPlus className="mr-1 h-4 w-4" /> Register
+                    </Link>
+                  </Button>
                 </div>
               )
             ) : (
@@ -140,4 +167,3 @@ export function SiteHeader() {
     </header>
   );
 }
-

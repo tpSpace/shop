@@ -5,8 +5,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Register - Nashfur",
-  description: "Create your account to start shopping at Nashfur.",
+  title: "Register - IdeaZ",
+  description: "Create your account to start shopping at IdeaZ.",
 };
 
 export default function RegisterPage() {
@@ -17,7 +17,10 @@ export default function RegisterPage() {
         <RegisterForm />
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-primary hover:underline">
+          <Link
+            href="/login"
+            className="font-medium text-primary hover:underline"
+          >
             Log in here
           </Link>
         </p>
@@ -25,4 +28,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

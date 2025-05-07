@@ -8,7 +8,7 @@ export function Footer() {
     <footer className="py-8 bg-gray-200 mt-auto">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         <div>
-          <h3 className="text-xl font-bold text-black mb-4">Nashfur</h3>
+          <h3 className="text-xl font-bold text-black mb-4">IdeaZ</h3>
           <ul className="space-y-2 text-gray-600">
             <li>
               <Link href="/about">About</Link>
@@ -49,7 +49,7 @@ export function Footer() {
             <Button className="bg-black text-white hover:bg-gray-800">+</Button>
           </div>
           <p className="text-sm text-gray-500 mt-4">
-            © 2025 Nashfur. All rights reserved.
+            © 2025 IdeaZ. All rights reserved.
           </p>
           <div className="flex justify-center md:justify-start space-x-2 text-sm text-gray-600">
             <Link href="/terms">Terms of Condition</Link>

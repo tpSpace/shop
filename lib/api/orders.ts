@@ -1,5 +1,3 @@
-// /home/ubuntu/frontend_ecommerce/lib/api/orders.ts
-
 import apiClient from "./apiClient";
 import { Order, OrderRequest } from "@/lib/types/order";
 
@@ -13,15 +11,12 @@ export const createOrder = async (
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
-  } catch (error: any) {
-    console.error("Failed to create order:", error);
-    // Rethrow or handle specific errors
-    // Return null or throw error based on how you want to handle it in the form
-    if (error.response && error.response.data) {
-      // Re-throw a new error with the backend message for better handling in the component
-      throw new Error(error.response.data.message || "Order placement failed.");
-    }
-    throw error; // Rethrow original error if no specific message
+  } catch (error: unknown) {
+    console.error(
+      `Failed to create order for user ${orderData.userId}:`,
+      error
+    );
+    return null;
   }
 };
 

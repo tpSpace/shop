@@ -1,18 +1,82 @@
 import apiClient from "./apiClient";
-import { Product, PaginatedProducts, RatingRequest, Rating } from "@/lib/types";
+import {
+  Product,
+  PaginatedProducts,
+  RatingRequest,
+  Rating,
+  ProductResponse,
+  ProductImageDto,
+} from "@/lib/types";
 
-// Fetch all products with pagination
+// File: lib/api/products.ts
+
 export const getAllProducts = async (
   page: number = 0,
-  size: number = 10
+  size: number = 12,
+  categoryId: string = "",
+  query: string = "",
+  sort: string = "newest",
+  minPrice?: number,
+  maxPrice?: number
 ): Promise<PaginatedProducts | null> => {
   try {
+    // Build request parameters
+    const params: Record<string, unknown> = {
+      page: page.toString(),
+      size: size.toString(),
+    }; // Reverted to Record<string, any>
+
+    // Add category filter if provided
+    if (categoryId) {
+      params.categoryId = categoryId;
+    }
+
+    // Add search query if provided
+    if (query) {
+      params.keyword = query;
+    }
+
+    // Add price filters if provided
+    if (minPrice !== undefined) {
+      params.minPrice = minPrice;
+    }
+
+    if (maxPrice !== undefined) {
+      params.maxPrice = maxPrice;
+    }
+
+    // Add sorting parameters
+    switch (sort) {
+      case "price_asc":
+        params.sortBy = "price";
+        params.direction = "asc";
+        break;
+      case "price_desc":
+        params.sortBy = "price";
+        params.direction = "desc";
+        break;
+      case "name_asc":
+        params.sortBy = "name";
+        params.direction = "asc";
+        break;
+      case "name_desc":
+        params.sortBy = "name";
+        params.direction = "desc";
+        break;
+      default:
+        // Default to newest first
+        params.sortBy = "createdAt";
+        params.direction = "desc";
+    }
+
+    // Make API request
     const response = await apiClient.get<PaginatedProducts>(
       "/api/v1/products",
       {
-        params: { page, size },
+        params,
       }
     );
+
     return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);
@@ -43,19 +107,45 @@ export const getFeaturedProducts = async (
   }
 };
 
-// Fetch product by ID
+// Fetch product by ID with fallback for 401 errors
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
-    const response = await apiClient.get<Product>(`/api/v1/products/${id}`);
-    // console.log("Product Data:", response.data);
-    return response.data;
+    // Try standard endpoint first
+    try {
+      const response = await apiClient.get<ProductResponse>(
+        `/api/v1/products/${id}/details`
+      );
+      // Optionally fetch images
+      const imagesResponse = await apiClient.get<ProductImageDto[]>(
+        `/api/v1/products/${id}/images`
+      );
+      return {
+        ...response.data,
+        images: imagesResponse.data.map((img) => img.imageData),
+      } as Product; // Removed comment about fetching ratings
+    } catch (error) {
+      // Handle error or fallback logic
+      throw error;
+    }
   } catch (error) {
     console.error(`Failed to fetch product ${id}:`, error);
     return null;
   }
 };
-
-// Fetch products by category ID with pagination
+export const getProductImages = async (
+  productId: string
+): Promise<string[]> => {
+  try {
+    const response = await apiClient.get<ProductImageDto[]>(
+      `/api/v1/products/${productId}/images`
+    );
+    return response.data.map((img) => img.imageData);
+  } catch (error) {
+    console.error(`Failed to fetch images for product ${productId}:`, error);
+    return [];
+  }
+};
+// Rest of your API methods remain unchanged
 export const getProductsByCategory = async (
   categoryId: string,
   page: number = 0,
@@ -123,7 +213,6 @@ export const getRatingsByProduct = async (
   productId: string
 ): Promise<Rating[]> => {
   try {
-    // Updated to match backend endpoint structure
     const response = await apiClient.get<Rating[]>("/api/v1/ratings/product", {
       params: { productId },
     });

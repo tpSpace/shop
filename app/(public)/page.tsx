@@ -10,9 +10,9 @@ import { AmbitionsSection } from "@/components/sections/ambitions-section";
 import { HeroSection } from "@/components/sections/hero-section";
 
 export const metadata: Metadata = {
-  title: "Nashfur - Elegant & Affordable Furniture",
+  title: "IdeaZ - Elegant & Affordable Furniture",
   description:
-    "Discover elegant and affordable furniture for every room at Nashfur. Shop sofas, tables, chairs, and more.",
+    "Discover elegant and affordable furniture for every room at IdeaZ. Shop sofas, tables, chairs, and more.",
   keywords: [
     "furniture",
     "affordable furniture",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   // Ensure metadataBase is correctly set for production
   // metadataBase: new URL("https://yourdomain.com"),
   openGraph: {
-    title: "Nashfur - Elegant & Affordable Furniture",
+    title: "IdeaZ - Elegant & Affordable Furniture",
     description: "Explore our collection of stylish and affordable furniture.",
   },
 };

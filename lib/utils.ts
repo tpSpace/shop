@@ -15,9 +15,9 @@ export function formatPrice(price: number): string {
 export const formatBase64Image = (
   imageUrl: string,
   mimeType?: string
-): string => {
-  if (imageUrl.startsWith("data:image")) {
-    return imageUrl;
+): string | null => {
+  if (imageUrl === "") {
+    return null;
   }
   const mime = mimeType || "image/jpeg"; // Fallback to JPEG
   return `data:${mime};base64,${imageUrl}`;

@@ -1,27 +1,37 @@
 import { Category } from "./categories-schema";
 import { Rating } from "./rating";
 
-export interface Product {
+// Base Product interface - includes all common properties
+export type Product = {
+  categoryName: string;
   id: string;
   name: string;
   description: string;
   price: number;
-  stockQuantity: number;
-  category?: Category; // Optional, might not always be loaded
-  images?: string[]; // Optional array of images
-  ratings?: Rating[]; // Optional array of ratings
-  createdAt?: string; // Or Date
-  updatedAt?: string; // Or Date
-  // Add averageRating if calculated/provided by backend
+  quantity: number;
+  category: Category;
+  images?: string[];
+  ratings?: Rating[];
+  createdAt?: string;
+  updatedAt?: string;
   averageRating?: number;
-}
+};
 
-// If backend uses a different structure for paginated products
-export interface PaginatedProducts {
+// Interface for paginated product responses
+export type PaginatedProducts = {
   content: Product[];
   totalPages: number;
   totalElements: number;
   number: number; // Current page number
   size: number; // Page size
-  // Add other pagination fields if needed
-}
+};
+
+// Product details from the details endpoint (no images)
+export type ProductResponse = Omit<Product, "images">;
+
+// Image DTO returned by the images endpoint
+export type ProductImageDto = {
+  id: string;
+  productId: string;
+  imageData: string;
+};

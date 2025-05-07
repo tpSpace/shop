@@ -5,8 +5,8 @@ import { Footer } from "@/components/layout/footer";
 import ReactQueryProvider from "@/lib/client";
 
 export const metadata: Metadata = {
-  title: "Nashfur - Elegant Furniture",
-  description: "Discover elegant and affordable furniture at Nashfur.",
+  title: "IdeaZ - Elegant Furniture",
+  description: "Discover elegant and affordable furniture at IdeaZ.",
 };
 
 export default function RootLayout({

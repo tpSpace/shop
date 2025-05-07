@@ -3,8 +3,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Login - Nashfur",
-  description: "Log in to your Nashfur account.",
+  title: "Login - IdeaZ",
+  description: "Log in to your IdeaZ account.",
 };
 
 export default function LoginPage() {
@@ -15,7 +15,10 @@ export default function LoginPage() {
         <LoginForm />
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
+          <Link
+            href="/register"
+            className="font-medium text-primary hover:underline"
+          >
             Register here
           </Link>
         </p>
@@ -23,4 +26,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

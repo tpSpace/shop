@@ -1,5 +1,7 @@
 import { Product } from "@/lib/types";
 import { ProductCard } from "@/features/products/components/product-card";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 interface PopularSectionProps {
   products: Product[];
@@ -24,11 +26,11 @@ export function PopularSection({ products }: PopularSectionProps) {
           </p>
         )}
         {/* Optional: Add a button to view all products */}
-        {/* <div className="text-center mt-12">
+        <div className="text-center mt-12">
           <Button asChild>
             <Link href="/products">View All Products</Link>
           </Button>
-        </div> */}
+        </div>
       </div>
     </section>
   );

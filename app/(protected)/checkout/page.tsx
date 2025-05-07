@@ -80,7 +80,6 @@ export default function CheckoutPage() {
     };
 
     try {
-      console.log("Placing order with data:", orderRequest);
       const createdOrder = await createOrder(orderRequest, token);
 
       if (!createdOrder) {

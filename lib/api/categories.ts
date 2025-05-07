@@ -22,7 +22,6 @@ api.interceptors.request.use((config) => {
 export const getCategories = async (): Promise<Category[]> => {
   try {
     const response = await api.get("/v1/categories");
-    console.log("Categories API response:", response.data);
 
     // Handle different response structures
     const data = response.data;
