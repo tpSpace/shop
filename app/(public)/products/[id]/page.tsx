@@ -1,4 +1,4 @@
-import { getProductById } from "@/lib/api/products";
+import { getProductById, getRatingsByProductId } from "@/lib/api/products";
 import { Rating } from "@/lib/types";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -49,12 +49,12 @@ const renderStars = (rating: number) => {
 };
 
 // Helper function to calculate average rating
-function calculateAverageRating(ratings: Rating[] | undefined): number {
+function calculateAverageRating(ratings: Rating[]): number {
   if (!ratings || ratings.length === 0) {
     return 0;
   }
   const totalRating = ratings.reduce(
-    (sum, rating) => sum + rating.ratingValue,
+    (sum, rating) => sum + rating.score,
     0
   );
   return totalRating / ratings.length;
@@ -72,7 +72,7 @@ const Review = ({ rating }: { rating: Rating }) => (
         </div>
         <div>
           <p className="font-medium">Customer</p>
-          <div className="flex">{renderStars(rating.ratingValue)}</div>
+          <div className="flex">{renderStars(rating.score)}</div>
         </div>
       </div>
       <span className="text-xs text-gray-500">
@@ -88,10 +88,14 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
   const params = await props.params;
   const { id } = params;
   const product = await getProductById(id);
+  
   if (!product) {
     notFound(); // Trigger 404 if product not found
   }
-  const averageRating = calculateAverageRating(product.ratings);
+  
+  // Fetch ratings directly using the endpoint instead of from product object
+  const ratings = await getRatingsByProductId(id);
+  const averageRating = calculateAverageRating(ratings);
 
   // Breadcrumb paths using category directly from product
   const breadcrumbPaths = [
@@ -159,12 +163,12 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
 
             <div className="flex items-center mb-4">
               {renderStars(averageRating)}
-              {product.ratings && product.ratings.length > 0 && (
+              {ratings.length > 0 && (
                 <Link
                   href="#reviews"
                   className="ml-2 text-sm text-blue-600 hover:underline"
                 >
-                  ({product.ratings.length} reviews)
+                  ({ratings.length} reviews)
                 </Link>
               )}
             </div>
@@ -219,7 +223,7 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Additional Details</TabsTrigger>
             <TabsTrigger value="reviews">
-              Reviews ({product.ratings?.length || 0})
+              Reviews ({ratings.length})
             </TabsTrigger>
             <TabsTrigger value="shipping">Shipping & Returns</TabsTrigger>
           </TabsList>
@@ -267,7 +271,7 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
                     <div>
                       {renderStars(averageRating)}
                       <p className="text-sm text-gray-500">
-                        {product.ratings?.length || 0} reviews
+                        {ratings.length} reviews
                       </p>
                     </div>
                   </div>
@@ -282,9 +286,9 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
 
               {/* Reviews List */}
               <div className="md:w-2/3">
-                {product.ratings && product.ratings.length > 0 ? (
+                {ratings.length > 0 ? (
                   <div className="space-y-4">
-                    {product.ratings.map((rating) => (
+                    {ratings.map((rating) => (
                       <Review key={rating.id} rating={rating} />
                     ))}
                   </div>

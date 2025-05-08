@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from '@/lib/store/authStore';
 
 // Determine the base URL based on the environment
 const API_BASE_URL =
@@ -11,25 +12,13 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptor to add JWT token to requests if available
-apiClient.interceptors.request.use(
-  (config) => {
-    // Check if running in browser environment before accessing localStorage
-    if (typeof window !== "undefined") {
-      const authData = localStorage.getItem("auth-storage");
-      if (authData) {
-        const { state } = JSON.parse(authData);
-        const token = state?.token;
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+// Set up Axios interceptors to include token in headers
+apiClient.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().jwt;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
 export default apiClient;

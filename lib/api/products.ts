@@ -196,17 +196,14 @@ export const searchProducts = async (
 
 // Add a rating to a product
 export const addRating = async (
-  ratingData: RatingRequest,
-  token: string
+  ratingData: RatingRequest
 ): Promise<Rating | null> => {
   try {
     const response = await apiClient.post<Rating>(
       "/api/v1/ratings",
-      ratingData,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      ratingData
     );
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to add rating:", error);
@@ -222,6 +219,16 @@ export const getRatingsByProduct = async (
     const response = await apiClient.get<Rating[]>("/api/v1/ratings/product", {
       params: { productId },
     });
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch ratings for product ${productId}:`, error);
+    return [];
+  }
+};
+
+export const getRatingsByProductId = async (productId: string): Promise<Rating[]> => {
+  try {
+    const response = await apiClient.get<Rating[]>(`/api/v1/ratings/${productId}`);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch ratings for product ${productId}:`, error);

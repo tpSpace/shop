@@ -11,9 +11,9 @@ const api = axios.create({
 
 // Add auth token interceptor
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const jwt = useAuthStore.getState().jwt;
+  if (jwt) {
+    config.headers.Authorization = `Bearer ${jwt}`;
   }
   return config;
 });

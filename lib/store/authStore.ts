@@ -8,11 +8,11 @@ export interface User {
   role: string;
   firstName: string;
   lastName: string;
-  bio: string;
+  bio?: string;
 }
 
 interface AuthState {
-  token: string | null;
+  jwt: string | null;
   user: User | null;
   isAuthenticated: boolean;
   setAuth: (token: string, user: User) => void;
@@ -23,12 +23,12 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      token: null,
+      jwt: null,
       user: null,
       isAuthenticated: false,
-      setAuth: (token, user) => set({ token, user, isAuthenticated: true }),
-      logout: () => set({ token: null, user: null, isAuthenticated: false }),
-      clearAuth: () => set({ token: null, user: null, isAuthenticated: false }),
+      setAuth: (jwt, user) => set({ jwt, user, isAuthenticated: true }),
+      logout: () => set({ jwt: null, user: null, isAuthenticated: false }),
+      clearAuth: () => set({ jwt: null, user: null, isAuthenticated: false }),
     }),
     {
       name: "admin-auth-storage",

@@ -1,11 +1,5 @@
 import { LoginForm } from "@/components/sections/login-form"; // Recreate this component
-import { Metadata } from "next";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Login - IdeaZ",
-  description: "Log in to your IdeaZ account.",
-};
 
 export default function LoginPage() {
   return (

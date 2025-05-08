@@ -1,14 +1,16 @@
+import { useAuthStore } from "../store/authStore";
 import apiClient from "./apiClient";
 import { User } from "@/lib/types";
 
 // Updated to match backend response structure
 interface AuthResponse {
-  token: string;
+  jwt: string;
   role: string;
-  id: string;
-  username: string;
+  userId: string;
   firstName: string;
   lastName: string;
+  email?: string;
+  bio?: string;
   message?: string;
 }
 
@@ -53,28 +55,28 @@ export const registerUser = async (
 
     // Map the backend response to our frontend expected format
     return {
-      token: response.data.token,
+      jwt: response.data.jwt,
       role: response.data.role,
-      id: response.data.id,
-      username: response.data.username,
+      userId: response.data.userId,
       firstName: response.data.firstName,
       lastName: response.data.lastName,
+      email: response.data.email,
+      bio: response.data.bio,
     };
   } catch (error: any) {
     console.error("Registration failed:", error);
     if (error.response && error.response.data) {
       if (typeof error.response.data === "string") {
         return {
-          token: "",
+          jwt: "",
           role: "",
-          id: "",
-          username: "",
+            userId: "",
           firstName: "",
           lastName: "",
           message: error.response.data,
         };
       }
-      return { ...error.response.data, token: "" };
+      return { ...error.response.data, jwt: "" };
     }
     return null;
   }
@@ -87,53 +89,36 @@ export const loginUser = async (
 ): Promise<AuthResponse | null> => {
   try {
     const requestData: LoginRequest = { email, password };
-    const response = await apiClient.post<AuthResponse>(
+    const response = await apiClient.post<any>(
       "/api/auth/login",
       requestData
     );
-
+    console.log(response.data);
+    
     // Map backend response to our expected format
     return {
-      token: response.data.token,
+      jwt: response.data.token,
       role: response.data.role,
-      id: response.data.id,
-      username: response.data.username,
+      userId: response.data.userId,
       firstName: response.data.firstName,
       lastName: response.data.lastName,
+      email: response.data.email,
     };
   } catch (error: any) {
     console.error("Login failed:", error);
     if (error.response && error.response.data) {
       if (typeof error.response.data === "string") {
         return {
-          token: "",
+          jwt: "",
           role: "",
-          id: "",
-          username: "",
+          userId: "",
           firstName: "",
           lastName: "",
           message: error.response.data,
         };
       }
-      return { ...error.response.data, token: "" };
+      return { ...error.response.data, jwt: "" };
     }
-    return null;
-  }
-};
-
-// Updated to use the correct endpoint from your UserController
-export const fetchUserProfile = async (
-  token: string,
-  userId: string
-): Promise<User | null> => {
-  try {
-    const response = await apiClient.get(`/api/v1/users/by-id`, {
-      params: { id: userId },
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch user profile:", error);
     return null;
   }
 };

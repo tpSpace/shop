@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { login, getCurrentUser } from "@/lib/auth";
+import { loginUser } from "@/lib/api/auth";
 import { useAuthStore } from "@/lib/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,18 +45,25 @@ export function LoginForm() {
 
     try {
       // Login and get token
-      const authResponse = await login(data);
-      
-      if (!authResponse || !authResponse.token) {
+      const authResponse = await loginUser(data.email, data.password);
+      console.log(authResponse);
+      if (!authResponse || !authResponse.jwt) {
         throw new Error("Invalid login response");
       }
-      
       // Get user data with the token
-      const user = await getCurrentUser();
       
       // Save auth info to store
-      setAuth(authResponse.token, user);
-      
+      setAuth(authResponse.jwt, {
+        id: authResponse.userId,
+        email: authResponse.email || "",
+        role: authResponse.role,
+        firstName: authResponse.firstName,
+        lastName: authResponse.lastName,
+        bio: "",
+      });
+      // get jwt from store
+      const jwt = useAuthStore.getState().jwt;
+      console.log(jwt);
       // Redirect to homepage
       router.push("/");
       router.refresh(); // Force refresh to update navbar state
@@ -70,6 +77,7 @@ export function LoginForm() {
         setError("An error occurred. Please try again later.");
       }
       console.error("Login error:", err);
+      
     } finally {
       setLoading(false);
     }

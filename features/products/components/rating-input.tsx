@@ -19,7 +19,7 @@ export function RatingInput({ productId }: RatingInputProps) {
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { user, token, isAuthenticated } = useAuthStore();
+  const { user, jwt, isAuthenticated } = useAuthStore();
   const router = useRouter();
 
   const handleRating = (rate: number) => {
@@ -32,7 +32,7 @@ export function RatingInput({ productId }: RatingInputProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated || !user || !token) {
+    if (jwt === null) {
       toast.error("Login Required", {
         description: (
           <>
@@ -61,13 +61,13 @@ export function RatingInput({ productId }: RatingInputProps) {
     setIsLoading(true);
     const ratingData: RatingRequest = {
       productId,
-      userId: user.id,
-      ratingValue: rating,
-      comment: comment || undefined,
+      score: rating,
+      comment: comment || "",
+      userId: user?.id || "",
     };
-
+    console.log(ratingData);
     try {
-      const result = await addRating(ratingData, token);
+      const result = await addRating(ratingData);
       if (result) {
         toast.success("Review Submitted", {
           description: "Thank you for your feedback!",

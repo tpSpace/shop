@@ -17,7 +17,7 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const {
     user,
-    token,
+    jwt,
     isAuthenticated,
     isLoading: isAuthLoading,
   } = useAuthStore();

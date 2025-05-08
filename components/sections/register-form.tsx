@@ -70,17 +70,18 @@ export function RegisterForm() {
         values.address
       );
 
-      if (response && response.token) {
+      if (response && response.jwt) {
         const user = {
           id: response.id,
           email: values.email,
           firstName: response.firstName,
           lastName: response.lastName,
           role: response.role,
+          bio: '',
         };
 
         // Store auth data
-        setAuth(response.token, user);
+        setAuth(response.jwt, user);
 
         toast.success("Registration Successful", {
           description: `Welcome, ${response.firstName}! Your account has been created.`,
