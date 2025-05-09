@@ -23,7 +23,7 @@ import {
 type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
 
 interface ProductsPageProps {
-  searchParams: Promise<{
+  searchParams: {
     query?: string;
     category?: string;
     minPrice?: string;
@@ -31,23 +31,20 @@ interface ProductsPageProps {
     page?: string;
     size?: string;
     sort?: SortOption;
-  }>;
+  };
 }
 
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
-  // Await the searchParams
-  const params = await searchParams;
-
   // Parse query parameters
-  const query = params?.query || "";
-  const categoryId = params?.category || "";
-  const minPrice = params?.minPrice ? parseFloat(params.minPrice) : undefined;
-  const maxPrice = params?.maxPrice ? parseFloat(params.maxPrice) : undefined;
-  const page = parseInt(params?.page || "0", 10);
-  const size = parseInt(params?.size || "12", 10);
-  const sort = (params?.sort || "newest") as SortOption;
+  const query = searchParams?.query || "";
+  const categoryId = searchParams?.category || "";
+  const minPrice = searchParams?.minPrice ? parseFloat(searchParams.minPrice) : undefined;
+  const maxPrice = searchParams?.maxPrice ? parseFloat(searchParams.maxPrice) : undefined;
+  const page = parseInt(searchParams?.page || "0", 10);
+  const size = parseInt(searchParams?.size || "12", 10);
+  const sort = (searchParams?.sort || "newest") as SortOption;
 
   // Fetch products and categories in parallel
   const [productsData, categories] = await Promise.all([

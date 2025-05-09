@@ -2,12 +2,11 @@ import apiClient from "./apiClient";
 import {
   Product,
   PaginatedProducts,
-  RatingRequest,
-  Rating,
+ 
   ProductResponse,
   ProductImageDto,
-} from "@/lib/types";
-
+} from "@/lib/types/product";
+import { RatingRequest, Rating } from "@/lib/types/rating";
 // File: lib/api/products.ts
 
 // Define sort options type for better type safety
@@ -131,6 +130,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
       } as Product; // Removed comment about fetching ratings
     } catch (error) {
       // Handle error or fallback logic
+      console.error(`Failed to fetch product ${id}:`, error);
       throw error;
     }
   } catch (error) {

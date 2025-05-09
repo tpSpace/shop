@@ -52,7 +52,7 @@ export default function CartPage() {
             >
               <Image
                 src={item.productImages?.[0]?.imageUrl || "/placeholder.svg"}
-                alt={item.name}
+                alt={item.productImages?.[0]?.imageUrl || "Product Image"}
                 width={80}
                 height={80}
                 className="rounded object-cover flex-shrink-0"
@@ -62,7 +62,7 @@ export default function CartPage() {
                   href={`/products/${item.id}`}
                   className="font-medium hover:underline"
                 >
-                  {item.name}
+                  {item.productName}
                 </Link>
                 <p className="text-sm text-gray-500">
                   Price: ${item.price.toFixed(2)}
@@ -114,7 +114,7 @@ export default function CartPage() {
                 onClick={() => {
                   removeItem(item.id);
                   toast.success("Item Removed", {
-                    description: `${item.name} removed from cart.`,
+                    description: `${item.productName} removed from cart.`,
                   });
                 }}
                 aria-label="Remove item"

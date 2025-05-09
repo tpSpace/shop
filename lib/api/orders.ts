@@ -1,3 +1,5 @@
+"use client";
+
 import apiClient from "./apiClient";
 import { Order, OrderRequest } from "@/lib/types/order";
 
@@ -48,3 +50,34 @@ export const getOrderById = async (
     return null;
   }
 };
+
+export function fetchOrders(status: string): Promise<Order[]> {
+  return new Promise((resolve, reject) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+      reject(new Error('No authentication token'));
+      return;
+    }
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders?status=${status}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (response.status === 401) {
+        window.location.href = '/login';
+        reject(new Error('Unauthorized'));
+        return;
+      }
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      return response.json();
+    })
+    .then(resolve)
+    .catch(reject);
+  });
+}

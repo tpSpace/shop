@@ -1,7 +1,9 @@
+"use client";
+
 import { getProductById, getRatingsByProductId, getAverageRatingForProduct } from "@/lib/api/products";
 import { Rating } from "@/lib/types/rating";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Star,
   ShoppingBag,
@@ -10,7 +12,7 @@ import {
   Share2,
   Award,
 } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState, use } from "react";
 import { AddToCartForm } from "@/features/products/components/add-to-cart-form";
 import { RatingInput } from "@/features/products/components/rating-input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tab";
 import ProductImageGallery from "@/features/products/components/product-image-gallery";
 import { useCartStore } from '@/lib/store/cartStore';
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -49,18 +53,6 @@ const renderStars = (rating: number) => {
   );
 };
 
-// Helper function to calculate average rating
-function calculateAverageRating(ratings: Rating[]): number {
-  if (!ratings || ratings.length === 0) {
-    return 0;
-  }
-  const totalRating = ratings.reduce(
-    (sum, rating) => sum + rating.score,
-    0
-  );
-  return totalRating / ratings.length;
-}
-
 // Review Component
 const Review = ({ rating }: { rating: Rating }) => (
   <div className="p-4 bg-white rounded-lg border border-gray-100 shadow-sm mb-4">
@@ -84,21 +76,63 @@ const Review = ({ rating }: { rating: Rating }) => (
   </div>
 );
 
-// Main Product Detail Page Component (Server Component)
-export default async function ProductDetailPage(props: ProductDetailPageProps) {
-  const params = await props.params;
-  const { id } = params;
-  const product = await getProductById(id);
-  
-  if (!product) {
-    notFound(); // Trigger 404 if product not found
+// Main Product Detail Page Component
+export default function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const resolvedParams = use(params);
+  const { id } = resolvedParams;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const { data: product, isLoading: productLoading } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => getProductById(id),
+    enabled: mounted,
+  });
+
+  const { data: ratings = [], isLoading: ratingsLoading } = useQuery({
+    queryKey: ['ratings', id],
+    queryFn: () => getRatingsByProductId(id),
+    enabled: mounted,
+  });
+
+  const { data: averageRating = 0, isLoading: ratingLoading } = useQuery({
+    queryKey: ['averageRating', id],
+    queryFn: () => getAverageRatingForProduct(id),
+    enabled: mounted,
+  });
+
+  const addToCart = useCartStore((state) => state.addItem);
+
+  if (!mounted) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-4">
+          <Skeleton className="h-[400px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
+        </div>
+      </div>
+    );
   }
-  
-  // Fetch ratings directly using the endpoint
-  const ratings = await getRatingsByProductId(id);
-  
-  // Get average rating directly from the backend instead of calculating it locally
-  const averageRating = await getAverageRatingForProduct(id);
+
+  if (productLoading || ratingsLoading || ratingLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-4">
+          <Skeleton className="h-[400px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    router.push('/404');
+    return null;
+  }
 
   // Breadcrumb paths using category directly from product
   const breadcrumbPaths = [
@@ -113,12 +147,11 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     { name: product.name, href: `/products/${id}` },
   ];
 
-  const addToCart = useCartStore((state) => state.addItem);
-  
   const handleAddToCart = (product: any) => {
     addToCart({
       id: product.id,
-      name: product.name,
+      productId: product.id,
+      productName: product.name,
       price: product.price,
       quantity: 1,
       image: product.images[0],
@@ -216,7 +249,7 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
             <AddToCartForm product={product} />
           </div>
 
-          {/* Shipping & Returns (Static content example) */}
+          {/* Shipping & Returns */}
           <div className="py-4 border-t border-gray-200">
             <div className="flex items-center gap-3 mb-3">
               <ShoppingBag className="h-5 w-5 text-gray-500" />
@@ -252,7 +285,6 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
                 </h4>
                 <ul className="list-disc list-inside space-y-1 text-gray-600">
                   <li>Item ID: {product.id}</li>
-                  {/* Fixed to consistently use category.name */}
                   <li>Category: {product.categoryName || "Uncategorized"}</li>
                   <li>In Stock: {product.quantity} units</li>
                 </ul>

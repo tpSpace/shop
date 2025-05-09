@@ -1,13 +1,10 @@
-import { Metadata } from "next";
+"use client";
+
 import "./globals.css";
 import { NavBar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import ReactQueryProvider from "@/lib/client";
-
-export const metadata: Metadata = {
-  title: "IdeaZ - Elegant Furniture",
-  description: "Discover elegant and affordable furniture at IdeaZ.",
-};
+import Head from 'next/head';
 
 export default function RootLayout({
   children,
@@ -16,6 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>IdeaZ - Elegant Furniture</title>
+        <meta name="description" content="Discover elegant and affordable furniture at IdeaZ." />
+      </head>
       <body className="min-h-screen flex flex-col bg-gray-100">
         <ReactQueryProvider>
           <NavBar />

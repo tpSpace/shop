@@ -30,7 +30,7 @@ export default function CheckoutPage() {
   // Pre-fill name if user data is available and not loading
   React.useEffect(() => {
     if (user && !isAuthLoading) {
-      setName(user.name || "");
+      setName(user.firstName || "");
     }
   }, [user, isAuthLoading]);
 
@@ -173,7 +173,7 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span className="flex-1 mr-2 truncate">
-                    {item.name} x {item.quantity}
+                    {item.productName} x {item.quantity}
                   </span>
                   <span className="font-medium">
                     ${(item.price * item.quantity).toFixed(2)}

@@ -7,38 +7,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import Image from 'next/image';
-import { useCartStore, type CartItem } from '@/lib/store/cartStore';
+import { useCartStore } from '@/lib/store/cartStore';
 import { Button } from '@/components/ui/button';
+import { fetchOrders } from '@/lib/api/orders';
+import { useEffect, useState } from 'react';
+import type { CartItem } from '@/lib/types/cart';
+import type { Order } from '@/lib/types/order';
 
-async function fetchOrders(status: string) {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    window.location.href = '/login';
-    return;
-  }
-
-  const response = await fetch(`http://your-springboot-api:8080/api/orders?status=${status}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  if (response.status === 401) {
-    window.location.href = '/login';
-    return;
-  }
-  
-  if (!response.ok) throw new Error('Failed to fetch orders');
-  return response.json();
-}
-
-function OrderCard({ order }: { order: any }) {
+function OrderCard({ order }: { order: Order }) {
   return (
     <Card className="mb-4">
       <CardHeader className="flex flex-row justify-between items-start">
         <div>
-          <CardTitle className="text-lg">Order #{order.orderId}</CardTitle>
+          <CardTitle className="text-lg">Order #{order.id}</CardTitle>
           <div className="text-sm text-muted-foreground">
             {new Date(order.orderDate).toLocaleDateString()}
           </div>
@@ -52,9 +33,9 @@ function OrderCard({ order }: { order: any }) {
           <div>
             <p className="font-medium">Items:</p>
             <ul className="list-disc pl-4">
-              {order.items.map((item: any) => (
-                <li key={item.productId}>
-                  {item.productName} (x{item.quantity})
+              {order.orderItems.map((item) => (
+                <li key={item.id}>
+                  {item.product.name} (x{item.quantity})
                 </li>
               ))}
             </ul>
@@ -62,7 +43,7 @@ function OrderCard({ order }: { order: any }) {
           <div>
             <p className="font-medium">Total: ${order.totalAmount}</p>
             <p className="text-sm text-muted-foreground">
-              Shipping to: {order.shippingAddress.streetAddress}, {order.shippingAddress.city}
+              Shipping to: {order.shippingAddress}
             </p>
           </div>
         </div>
@@ -82,20 +63,40 @@ function getStatusColor(status: string) {
 }
 
 export default function OrdersPage() {
-  const { data: pendingOrders, isLoading: pendingLoading, error: pendingError } = useQuery({
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const { data: pendingOrders = [], isLoading: pendingLoading, error: pendingError } = useQuery({
     queryKey: ['orders', 'pending'],
     queryFn: () => fetchOrders('pending'),
+    enabled: mounted,
   });
 
-  const { data: shippedOrders, isLoading: shippedLoading, error: shippedError } = useQuery({
+  const { data: shippedOrders = [], isLoading: shippedLoading, error: shippedError } = useQuery({
     queryKey: ['orders', 'shipped'],
     queryFn: () => fetchOrders('shipped'),
+    enabled: mounted,
   });
 
-  const { data: deliveredOrders, isLoading: deliveredLoading, error: deliveredError } = useQuery({
+  const { data: deliveredOrders = [], isLoading: deliveredLoading, error: deliveredError } = useQuery({
     queryKey: ['orders', 'delivered'],
     queryFn: () => fetchOrders('delivered'),
+    enabled: mounted,
   });
+
+  if (!mounted) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="space-y-4">
+          <Skeleton className="h-[150px] w-full" />
+          <Skeleton className="h-[150px] w-full" />
+        </div>
+      </div>
+    );
+  }
 
   if (pendingError || shippedError || deliveredError) {
     return (
@@ -129,8 +130,8 @@ export default function OrdersPage() {
               <Skeleton className="h-[150px] w-full" />
             </div>
           ) : (
-            pendingOrders?.map((order: any) => (
-              <OrderCard key={order.orderId} order={order} />
+            pendingOrders?.map((order) => (
+              <OrderCard key={order.id} order={order} />
             ))
           )}
         </TabsContent>
@@ -142,8 +143,8 @@ export default function OrdersPage() {
               <Skeleton className="h-[150px] w-full" />
             </div>
           ) : (
-            shippedOrders?.map((order: any) => (
-              <OrderCard key={order.orderId} order={order} />
+            shippedOrders?.map((order) => (
+              <OrderCard key={order.id} order={order} />
             ))
           )}
         </TabsContent>
@@ -155,8 +156,8 @@ export default function OrdersPage() {
               <Skeleton className="h-[150px] w-full" />
             </div>
           ) : (
-            deliveredOrders?.map((order: any) => (
-              <OrderCard key={order.orderId} order={order} />
+            deliveredOrders?.map((order) => (
+              <OrderCard key={order.id} order={order} />
             ))
           )}
         </TabsContent>
@@ -173,14 +174,14 @@ export function CartItem({ item }: { item: CartItem }) {
     <div className="flex items-center gap-4 py-4">
       <div className="relative h-20 w-20 flex-shrink-0">
         <Image
-          src={item.image}
-          alt={item.name}
+          src={item.image || ''}
+          alt={item.productName}
           fill
           className="object-cover rounded-md"
         />
       </div>
       <div className="flex-1">
-        <h3 className="font-medium">{item.name}</h3>
+        <h3 className="font-medium">{item.productName}</h3>
         <p className="text-sm text-muted-foreground">${item.price}</p>
         <div className="flex items-center gap-2 mt-2">
           <Button

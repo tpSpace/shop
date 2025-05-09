@@ -1,97 +1,88 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useCartStore } from "@/lib/store/cartStore";
-import { useAuthStore } from "@/lib/store/authStore";
-import { Product } from "@/lib/types";
-import { ShoppingCart, LogIn } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner"; // Use Sonner for toasts
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useCartStore } from '@/lib/store/cartStore';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 interface AddToCartFormProps {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    images?: string[];
+  };
 }
 
 export function AddToCartForm({ product }: AddToCartFormProps) {
   const [quantity, setQuantity] = useState(1);
-  const addItem = useCartStore((state) => state.addItem);
-  const { isAuthenticated, isLoading } = useAuthStore();
-  const router = useRouter();
+  const { addItem, isLoading, error } = useCartStore();
 
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0) {
-      setQuantity(value);
-    } else if (e.target.value === "") {
-      setQuantity(0); // Allow clearing the input
-    }
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleAddToCart = () => {
-    if (isLoading) {
-      toast.warning("Please wait", {
-        description: "Checking authentication status...",
-      });
+    if (quantity > product.quantity) {
+      toast.error('Not enough stock available');
       return;
     }
 
-    if (!isAuthenticated) {
-      toast.error("Login Required", {
-        description: (
-          <>
-            Please log in to add items to your cart.{" "}
-            <Button
-              variant="link"
-              size="sm"
-              className="p-0 h-auto text-blue-600"
-              onClick={() => router.push("/login")}
-            >
-              <LogIn className="mr-1 h-4 w-4" /> Login
-            </Button>
-          </>
-        ),
-      });
+    if (quantity < 1) {
+      toast.error('Quantity must be at least 1');
       return;
     }
 
-    if (quantity <= 0) {
-      toast.error("Invalid Quantity", {
-        description: "Please enter a quantity greater than zero.",
+    try {
+      await addItem({
+        id: product.id,
+        productId: product.id,
+        productName: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images?.[0]
       });
-      return;
+      
+      toast.success('Added to cart successfully');
+      setQuantity(1);
+    } catch (error) {
+      toast.error('Failed to add item to cart');
     }
-
-    addItem(product, quantity);
-    toast.success("Added to Cart", {
-      description: `${quantity} x ${product.name} added to your cart.`,
-    });
   };
 
   return (
-    <div className="flex items-center space-x-4 my-6">
-      <label htmlFor={`quantity-${product.id}`} className="font-medium">
-        Quantity:
-      </label>
-      <Input
-        type="number"
-        id={`quantity-${product.id}`}
-        value={quantity === 0 ? "" : quantity}
-        onChange={handleQuantityChange}
-        min={1}
-        className="w-20 h-10"
-        aria-label="Quantity"
-      />
-      <Button
-        size="lg"
-        onClick={handleAddToCart}
-        className="flex-grow sm:flex-grow-0"
-        disabled={isLoading}
-      >
-        <ShoppingCart className="mr-2 h-5 w-5" />
-        {isLoading ? "Checking..." : "Add to Cart"}
-      </Button>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex items-center gap-4">
+        <Input
+          type="number"
+          min="1"
+          max={product.quantity}
+          value={quantity}
+          onChange={(e) => setQuantity(parseInt(e.target.value))}
+          className="w-20"
+        />
+        <Button 
+          type="submit" 
+          className="flex-1"
+          disabled={isLoading || product.quantity === 0}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Adding...
+            </>
+          ) : (
+            'Add to Cart'
+          )}
+        </Button>
+      </div>
+      {product.quantity === 0 && (
+        <p className="text-sm text-red-500">Out of stock</p>
+      )}
+      {error && (
+        <p className="text-sm text-red-500">{error}</p>
+      )}
+    </form>
   );
 }

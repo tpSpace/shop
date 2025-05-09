@@ -33,7 +33,7 @@ A modern, responsive e-commerce frontend built with Next.js 15, React 19, and Ty
 ## 🛠️ Prerequisites
 
 - Node.js (Latest LTS version recommended)
-- Bun package manager
+- Bun package manager and js runtime
 - Git
 
 ## 🏗️ Installation
