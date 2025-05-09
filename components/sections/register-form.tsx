@@ -69,15 +69,15 @@ export function RegisterForm() {
         values.phoneNumber,
         values.address
       );
-
+      console.log(response);
       if (response && response.jwt) {
         const user = {
-          id: response.id,
+          id: response.userId,
           email: values.email,
           firstName: response.firstName,
           lastName: response.lastName,
           role: response.role,
-          bio: '',
+          bio: "",
         };
 
         // Store auth data

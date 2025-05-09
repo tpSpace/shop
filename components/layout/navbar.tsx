@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, ShoppingCart, User, LogOut, Package } from "lucide-react";
+import { Search, ShoppingCart, User, LogOut, ShoppingBag, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store/authStore";
 
@@ -98,8 +98,14 @@ export function NavBar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/orders" className="w-full flex items-center">
-                    <Package className="mr-2 h-4 w-4" />
-                    <span>My Orders</span>
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    <span>Orders</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/cart" className="w-full flex items-center">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    <span>Cart</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

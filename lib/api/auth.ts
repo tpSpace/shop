@@ -1,6 +1,5 @@
 import { useAuthStore } from "../store/authStore";
 import apiClient from "./apiClient";
-import { User } from "@/lib/types";
 
 // Updated to match backend response structure
 interface AuthResponse {
@@ -52,10 +51,10 @@ export const registerUser = async (
       "/api/auth/register",
       requestData
     );
-
+    console.log(response.data);
     // Map the backend response to our frontend expected format
     return {
-      jwt: response.data.jwt,
+      jwt: response.data.token,
       role: response.data.role,
       userId: response.data.userId,
       firstName: response.data.firstName,

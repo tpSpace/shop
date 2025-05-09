@@ -1,5 +1,5 @@
-import { getProductById, getRatingsByProductId } from "@/lib/api/products";
-import { Rating } from "@/lib/types";
+import { getProductById, getRatingsByProductId, getAverageRatingForProduct } from "@/lib/api/products";
+import { Rating } from "@/lib/types/rating";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tab";
 import ProductImageGallery from "@/features/products/components/product-image-gallery";
+import { useCartStore } from '@/lib/store/cartStore';
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -93,9 +94,11 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     notFound(); // Trigger 404 if product not found
   }
   
-  // Fetch ratings directly using the endpoint instead of from product object
+  // Fetch ratings directly using the endpoint
   const ratings = await getRatingsByProductId(id);
-  const averageRating = calculateAverageRating(ratings);
+  
+  // Get average rating directly from the backend instead of calculating it locally
+  const averageRating = await getAverageRatingForProduct(id);
 
   // Breadcrumb paths using category directly from product
   const breadcrumbPaths = [
@@ -109,6 +112,18 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
     },
     { name: product.name, href: `/products/${id}` },
   ];
+
+  const addToCart = useCartStore((state) => state.addItem);
+  
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.images[0],
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">

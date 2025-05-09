@@ -23,16 +23,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export function SiteHeader() {
-  const { user, token, logout, isAuthenticated, isLoading } = useAuthStore();
+  const { user, logout, isAuthenticated, isLoading } = useAuthStore();
   const { getTotalItems } = useCartStore(); // Get total items from cart store
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [isClient, setIsClient] = useState(false);
-  const { toast } = useToast();
   const totalCartItems = getTotalItems(); // Get the total number of items
 
   useEffect(() => {
@@ -43,11 +42,8 @@ export function SiteHeader() {
 
   const handleLogout = () => {
     logout();
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-    router.push("/"); // Redirect to home after logout
+    toast.success("You have been successfully logged out.");
+    router.push("/");
   };
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -128,7 +124,7 @@ export function SiteHeader() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>
-                      {user?.name || user?.email || "My Account"}
+                      {user?.firstName || user?.email || "My Account"}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {/* <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem> */}

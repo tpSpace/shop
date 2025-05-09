@@ -15,6 +15,7 @@ interface AuthState {
   jwt: string | null;
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   setAuth: (token: string, user: User) => void;
   logout: () => void;
   clearAuth: () => void;
@@ -26,6 +27,7 @@ export const useAuthStore = create<AuthState>()(
       jwt: null,
       user: null,
       isAuthenticated: false,
+      isLoading: false,
       setAuth: (jwt, user) => set({ jwt, user, isAuthenticated: true }),
       logout: () => set({ jwt: null, user: null, isAuthenticated: false }),
       clearAuth: () => set({ jwt: null, user: null, isAuthenticated: false }),

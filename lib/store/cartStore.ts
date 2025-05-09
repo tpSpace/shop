@@ -1,16 +1,20 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Product } from '@/lib/types'; // Assuming Product type is defined
+import { Product } from '@/lib/types/product'; // Assuming Product type is defined
 
-interface CartItem extends Product {
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
   quantity: number;
+  image: string;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (item: CartItem) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
@@ -21,42 +25,34 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, quantity = 1) => {
+      addItem: (item) =>
         set((state) => {
-          const existingItem = state.items.find((item) => item.id === product.id);
+          const existingItem = state.items.find((i) => i.id === item.id);
           if (existingItem) {
-            // Update quantity if item already exists
-            const updatedItems = state.items.map((item) =>
-              item.id === product.id
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
-            );
-            return { items: updatedItems };
-          } else {
-            // Add new item
-            const newItem: CartItem = { ...product, quantity };
-            return { items: [...state.items, newItem] };
+            return {
+              items: state.items.map((i) =>
+                i.id === item.id
+                  ? { ...i, quantity: i.quantity + item.quantity }
+                  : i
+              ),
+            };
           }
-        });
-      },
+          return { items: [...state.items, item] };
+        }),
 
-      removeItem: (productId) => {
+      removeItem: (id) =>
         set((state) => ({
-          items: state.items.filter((item) => item.id !== productId),
-        }));
-      },
+          items: state.items.filter((item) => item.id !== id),
+        })),
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (id, quantity) =>
         set((state) => ({
           items: state.items.map((item) =>
-            item.id === productId ? { ...item, quantity: Math.max(0, quantity) } : item // Ensure quantity is not negative
-          ).filter(item => item.quantity > 0) // Remove item if quantity becomes 0
-        }));
-      },
+            item.id === id ? { ...item, quantity } : item
+          ),
+        })),
 
-      clearCart: () => {
-        set({ items: [] });
-      },
+      clearCart: () => set({ items: [] }),
 
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);

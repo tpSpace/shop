@@ -1,4 +1,4 @@
-import { Category } from "@/lib/types";
+import { Category } from "@/lib/types/categories-schema";
 import Link from "next/link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 

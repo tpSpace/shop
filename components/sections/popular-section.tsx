@@ -1,4 +1,4 @@
-import { Product } from "@/lib/types";
+import { Product } from "@/lib/types/product";
 import { ProductCard } from "@/features/products/components/product-card";
 import { Button } from "../ui/button";
 import Link from "next/link";
