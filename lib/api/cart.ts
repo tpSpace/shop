@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
   if (!token) {
     throw new Error('No authentication token found');
   }
-  return {
+  return {    
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
   };
